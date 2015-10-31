@@ -5,7 +5,7 @@ var request = require('superagent')
   , _ = require('underscore');
 
 // Endpoint template
-var endpoint = _.template('http://<%=service%>/service/<%=method%>/lomadee/<%=id%>/<%=country%>/');
+var endpoint = _.template('http://<%=service%>/service/<%=method%>/<%=id%>/<%=country%>/');
 
 module.exports = function (opts) {
   return new Buscape(opts);
@@ -13,7 +13,11 @@ module.exports = function (opts) {
 
 var Buscape = function Buscape (opts) {
   // Use production by default
-  this._service = 'bws.buscape.com';
+  if(opts.sandbox){
+    this._service = 'sandbox.buscape.com.br';
+  } else {
+    this._service = 'bws.buscape.com.br';
+  }
 
   // Allow keywords string in place of opts
   opts = 'string' === typeof opts ? {keywords: opts} : opts;
