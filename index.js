@@ -147,23 +147,41 @@ var format = function (products) {
     var p = product.offer
       , name = p.offername || p.offershortname
       , price = p.price.value
+      , productId = p.productId
       , currency = p.price.currency.abbreviation
       , link = productLink(p.links)
       , seller = p.seller.id
+      , sellerExtra = p.seller.extra
       , sellerName = p.seller.sellername
+      , sellerThumbNail = p.seller.thumbnail
+      , sellerRating = p.seller.rating.useraveragerating.rating
+      , sellerComments = p.seller.rating.useraveragerating.numcomments
       , id = p.id;
 
     // Filter unusable results
     if (!p || !name || !price || !link) return null;
 
     return {
-      name: name,
-      listPrice: price,
-      currency: currency,
-      url: link,
-      sellerId: seller,
-      sellerName: sellerName,
-      id: id
+      id: id,
+      seller: {
+        id: seller,
+        name: sellerName,
+        extra: sellerExtra,
+        thumb: sellerThumbNail,
+        rating: {
+          user_average_rating : {
+            rating: sellerRating,
+            num_comments: sellerComments
+          }
+        }
+      },
+      product: {
+        id: productId,
+        name: name,
+        listPrice: price,
+        currency: currency,
+        url: link
+      }
     }
   })
   .filter(function (p) {
