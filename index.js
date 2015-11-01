@@ -38,6 +38,11 @@ Buscape.prototype.source = function (sourceId) {
   return this._sourceId = sourceId, this;
 };
 
+// Set category
+Buscape.prototype.categoryId = function(categoryId) {
+  return this._categoryId = categoryId, this;
+}
+
 // Set price range
 Buscape.prototype.price = function (price) {
   // Allow min..max style pricerange
@@ -105,6 +110,7 @@ Buscape.prototype.done = function (cb) {
       id: this._id,
       country: this._country || 'BR'
     }))
+    .query({categoryId: this._categoryId})
     .query({keyword: this._keywords})
     .query({priceMin: this._minPrice})
     .query({priceMax: this._maxPrice})
