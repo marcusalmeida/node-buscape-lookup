@@ -97,6 +97,11 @@ Buscape.prototype.page = function (page) {
   return this._page = page, this;
 };
 
+Buscape.prototype.order = function(orderBy) {
+  return this._orderBy = orderBy, this;
+};
+
+
 Buscape.prototype.done = function (cb) {
   var limit = this._limit
     , one = this._one
@@ -116,6 +121,7 @@ Buscape.prototype.done = function (cb) {
     .query({priceMax: this._maxPrice})
     .query({clientIp: this._client})
     .query({sourceId: this._sourceId})
+    .query({order: this._orderBy})
     .query({allowedSellers: buscape ? null : this._seller})
     .query({format: 'json'})
     .query({page: this._page})
@@ -147,7 +153,7 @@ var format = function (products) {
     var p = product.offer
       , name = p.offername || p.offershortname
       , price = p.price.value
-      , productId = p.productId
+      , productId = p.productid
       , currency = p.price.currency.abbreviation
       , link = productLink(p.links)
       , seller = p.seller.id
