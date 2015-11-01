@@ -156,6 +156,7 @@ var format = function (products) {
       , productId = p.productid
       , currency = p.price.currency.abbreviation
       , link = productLink(p.links)
+      , thumb = p.thumbnail.url
       , seller = p.seller.id
       , sellerExtra = p.seller.extra
       , sellerName = p.seller.sellername
