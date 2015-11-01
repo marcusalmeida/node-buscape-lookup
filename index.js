@@ -160,7 +160,7 @@ var format = function (products) {
       , seller = p.seller.id
       , sellerExtra = p.seller.extra
       , sellerName = p.seller.sellername
-      , sellerThumbNail = p.seller.thumbnail.url
+      , sellerThumbNail = p.seller.thumbnail
       , sellerRating = p.seller.rating.useraveragerating.rating
       , sellerComments = p.seller.rating.useraveragerating.numcomments
       , id = p.id;
@@ -187,7 +187,9 @@ var format = function (products) {
         name: name,
         listPrice: price,
         currency: currency,
-        url: link
+        url: link,
+        thumb: thumb
+
       }
     }
   })
