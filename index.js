@@ -195,7 +195,7 @@ Buscape.prototype.done = function (cb) {
 
         metadata = format.metadata(res.body);
 
-        return cb(null, _.extend(formatted, metadata));
+        return cb(null, _.extend(new Array(formatted), metadata));
       }.bind(this));
   }
 };
