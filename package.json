@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "nomnom": "^1.8.0",
+    "speakingurl": "^7.0.0",
     "superagent": "^0.18.2",
     "underscore": "^1.6.0"
   },
@@ -25,5 +26,8 @@
   },
   "bin": {
     "buscape-lookup": "./bin.js"
+  },
+  "devDependencies": {
+    "prettyjson": "^1.1.3"
   }
 }

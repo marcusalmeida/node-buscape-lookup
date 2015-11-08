@@ -1,11 +1,15 @@
 /**
  * Module dependencies
  */
-var request = require('superagent')
+var format = require('./lib/formatter')
+  , helpers = require('./lib/helpers')
+  , request = require('superagent')
   , _ = require('underscore');
 
 // Endpoint template
 var endpoint = _.template('http://<%=service%>/service/<%=method%>/<%=id%>/<%=country%>/');
+
+var topProductsEndpoint = _.template('http://<%=service%>/service/v2/topProducts/<%=id%>/<%=country%>/');
 
 module.exports = function (opts) {
   return new Buscape(opts);
@@ -24,7 +28,6 @@ var Buscape = function Buscape (opts) {
 
   if (opts.keywords) {
     this._keywords = opts.keywords;
-    this.mode = 'search';
   }
 };
 
@@ -85,14 +88,6 @@ Buscape.prototype.client = function (ip) {
   return this._client = ip, this;
 }
 
-// Set seller id
-Buscape.prototype.seller = function (seller) {
-  // Switch to buscape mode
-  if (seller === 'buscape') return this._buscape = true, this;
-
-  return this._seller = seller, this;
-};
-
 Buscape.prototype.page = function (page) {
   return this._page = page, this;
 };
@@ -101,6 +96,13 @@ Buscape.prototype.order = function(orderBy) {
   return this._orderBy = orderBy, this;
 };
 
+Buscape.prototype.api = function(method) {
+  return this._api = method, this;
+};
+
+Buscape.prototype.topProducts = function(topProducts) {
+  return this._topProducts = topProducts, this;
+};
 
 Buscape.prototype.done = function (cb) {
   var limit = this._limit
@@ -108,124 +110,86 @@ Buscape.prototype.done = function (cb) {
     , buscape = this._buscape
     , seller = this._seller;
 
-  request
-    .get(endpoint({
-      service: this._service,
-      method: buscape ? 'findProductList' : 'findOfferList',
-      id: this._id,
-      country: this._country || 'BR'
-    }))
-    .query({categoryId: this._categoryId})
-    .query({keyword: this._keywords})
-    .query({priceMin: this._minPrice})
-    .query({priceMax: this._maxPrice})
-    .query({clientIp: this._client})
-    .query({sourceId: this._sourceId})
-    .query({order: this._orderBy})
-    .query({allowedSellers: buscape ? null : this._seller})
-    .query({format: 'json'})
-    .query({page: this._page})
-    .end(function (err, res) {
-      if (err) return cb(err);
+  if(this._topProducts){
+    request
+      .get(topProductsEndpoint({
+        service: this._service,
+        id: this._id,
+        country: this._country || 'BR'
+      }))
+      .query({sourceId: this._sourceId})
+      .query({categoryId: this._categoryId})
+      .query({format: 'json'})
+      .query({page: this._page})
+      .end(function (err, res) {
+        if (err) return cb(err);
 
-      // No offers found
-      if (!res.body.offer && !res.body.product) res.body.offer = res.body.product = [];
+        // No products found
+        if (!res.body.product) res.body.product = [];
 
-      // Format results
-      var formatted = buscape ? formatBuscape(res.body.product) : format(res.body.offer);
+        // Format results
+        var formatted = format.topProducts(res.body.product);
 
-      // Limit
-      if (limit) {
-        formatted = _.first(formatted, limit);
-      }
-
-      // One
-      if (one) {
-        formatted = _.first(formatted) || null;
-      }
-
-      return cb(null, formatted);
-    }.bind(this));
-};
-
-var format = function (products) {
-  return products.map(function (product) {
-    var p = product.offer
-      , name = p.offername || p.offershortname
-      , price = p.price.value
-      , productId = p.productid
-      , currency = p.price.currency.abbreviation
-      , link = productLink(p.links)
-      , thumb = p.thumbnail.url
-      , seller = p.seller.id
-      , sellerExtra = p.seller.extra
-      , sellerName = p.seller.sellername
-      , sellerThumbNail = p.seller.thumbnail
-      , sellerRating = p.seller.rating.useraveragerating.rating
-      , sellerComments = p.seller.rating.useraveragerating.numcomments
-      , id = p.id;
-
-    // Filter unusable results
-    if (!p || !name || !price || !link) return null;
-
-    return {
-      id: id,
-      seller: {
-        id: seller,
-        name: sellerName,
-        extra: sellerExtra,
-        thumb: sellerThumbNail,
-        rating: {
-          user_average_rating : {
-            rating: sellerRating,
-            num_comments: sellerComments
-          }
+        // Limit
+        if (limit) {
+          formatted = _.first(formatted, limit);
         }
-      },
-      product: {
-        id: productId,
-        name: name,
-        listPrice: price,
-        currency: currency,
-        url: link,
-        thumb: thumb
 
-      }
-    }
-  })
-  .filter(function (p) {
-    return p !== null
-  });
-};
+        // One
+        if (one) {
+          formatted = _.first(formatted) || null;
+        }
 
-var formatBuscape = function (products) {
-  return products.map(function (product) {
-    var p = product.product
-      , name = p.productname || p.productshortname
-      , price = p.pricemin || p.pricemax
-      , offers = p.numoffers
-      , currency = p.currency.abbreviation
-      , link = productLink(p.links)
-      , id = p.id;
+        return cb(null, formatted);
+      }.bind(this));
 
-    if (!p || !name || !price || !link) return null;
+  } else {
+    request
+      .get(endpoint({
+        service: this._service,
+        method: this._api,
+        id: this._id,
+        country: this._country || 'BR'
+      }))
+      .query({categoryId: this._categoryId})
+      .query(_.isArray(this._keywords) ? helpers.searchParams(this._keywords) : {keyword: this._keywords})
+      .query({priceMin: this._minPrice})
+      .query({priceMax: this._maxPrice})
+      .query({clientIp: this._client})
+      .query({sourceId: this._sourceId})
+      .query({order: this._orderBy})
+      .query({format: 'json'})
+      .query({page: this._page})
+      .end(function (err, res) {
+        if (err) return cb(err);
 
-    return {
-      name: name,
-      listPrice: price,
-      currency: currency,
-      url: link,
-      id: id
-    }
-  }).filter(function (p) {
-    return p !== null;
-  });
-};
+        // Not found
+        if (!res.body.offer && !res.body.product && !res.body.category) res.body.offer = res.body.product = res.body.category = [];
+        
+        // Format results
+        var formatted;
+        
+        if(this._api === 'findProductList'){
+          formatted = format.products(res.body.product);
+        } else if (this._api === 'findOfferList') { 
+          formatted = format.offers(res.body.offer);
+        } else if(this._api === 'findCategoryList') {
+          formatted = format.category(res.body.category);
+        }
 
-var productLink = function (links) {
-  var productLink = _.find(links, function (l) {
-    return l.link.type === 'offer' || l.link.type === 'product';
-  });
+        // Limit
+        if (limit) {
+          formatted = _.first(formatted, limit);
+        }
 
-  return productLink.link.url || null;
+        // One
+        if (one) {
+          formatted = _.first(formatted) || null;
+        }
+
+        metadata = format.metadata(res.body);
+
+        return cb(null, _.extend(formatted, metadata));
+      }.bind(this));
+  }    
 };

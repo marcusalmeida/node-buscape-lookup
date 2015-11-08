@@ -4,7 +4,12 @@
  * Dependencies
  */
 var buscape = require('./')
+  , prettyjson = require('prettyjson')
   , nomnom = require('nomnom');
+
+var options = {
+  indent: 2
+};
 
 var opts = nomnom
   .script('buscape')
@@ -13,6 +18,10 @@ var opts = nomnom
     abbr: 'i',
     required: true,
     help: 'Lomadee api key'
+  })
+  .option('api', {
+    abbr: 'a',
+    help: 'Method name for API (findProductList, findOffersList)'
   })
   .option('price', {
     abbr: 'p',
@@ -48,16 +57,21 @@ var opts = nomnom
   .option('client', {
     help: 'Set client ip'
   })
-  .option('seller', {
-    help: 'Set seller id',
-    abbr: 's'
-  })
   .option('page', {
     help: 'Set page',
     abbr: 'p'
   })
+  .option('category', {
+    help: 'Set category id',
+    abbr: 'cat'
+  })
+  .option('topProducts', {
+    help: 'Set flag for top products',
+    abbr: 'top'
+  })
   .parse();
 
+console.log(opts);
 buscape({keywords: opts.keywords})
   .id(opts.id)
   .country(opts.country)
@@ -66,8 +80,10 @@ buscape({keywords: opts.keywords})
   .limit(opts.limit)
   .source(opts.source)
   .client(opts.client)
-  .seller(opts.seller)
+  .topProducts(opts.topProducts)
+  .api(opts.api)
   .page(opts.page)
+  .categoryId(opts.category)
   .done(function (err, res) {
-    console.log(JSON.stringify(res));
+    console.log(prettyjson.render(res, options));
   });
