@@ -71,8 +71,7 @@ var opts = nomnom
   })
   .parse();
 
-console.log(opts);
-buscape({keywords: opts.keywords})
+buscape({keywords: opts.keywords, results: 20})
   .id(opts.id)
   .country(opts.country)
   .test(opts.test)

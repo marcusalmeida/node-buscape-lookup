@@ -29,6 +29,10 @@ var Buscape = function Buscape (opts) {
   if (opts.keywords) {
     this._keywords = opts.keywords;
   }
+
+  if (opts.results) {
+    this._resultPerPage = opts.results;
+  }
 };
 
 // Set application id
@@ -119,8 +123,9 @@ Buscape.prototype.done = function (cb) {
       }))
       .query({sourceId: this._sourceId})
       .query({categoryId: this._categoryId})
-      .query({format: 'json'})
+      .query({results: this._resultsPerPage})
       .query({page: this._page})
+      .query({format: 'json'})
       .end(function (err, res) {
         if (err) return cb(err);
 
@@ -158,20 +163,21 @@ Buscape.prototype.done = function (cb) {
       .query({clientIp: this._client})
       .query({sourceId: this._sourceId})
       .query({order: this._orderBy})
-      .query({format: 'json'})
+      .query({results: this._resultsPerPage})
       .query({page: this._page})
+      .query({format: 'json'})
       .end(function (err, res) {
         if (err) return cb(err);
 
         // Not found
         if (!res.body.offer && !res.body.product && !res.body.category) res.body.offer = res.body.product = res.body.category = [];
-        
+
         // Format results
         var formatted;
-        
+
         if(this._api === 'findProductList'){
           formatted = format.products(res.body.product);
-        } else if (this._api === 'findOfferList') { 
+        } else if (this._api === 'findOfferList') {
           formatted = format.offers(res.body.offer);
         } else if(this._api === 'findCategoryList') {
           formatted = format.category(res.body.category);
@@ -191,5 +197,5 @@ Buscape.prototype.done = function (cb) {
 
         return cb(null, _.extend(formatted, metadata));
       }.bind(this));
-  }    
+  }
 };
