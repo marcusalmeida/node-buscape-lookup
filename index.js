@@ -31,7 +31,7 @@ var Buscape = function Buscape (opts) {
   }
 
   if (opts.results) {
-    this._resultPerPage = opts.results;
+    this._resultsPerPage = opts.results;
   }
 };
 
