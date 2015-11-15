@@ -45,6 +45,11 @@ Buscape.prototype.source = function (sourceId) {
   return this._sourceId = sourceId, this;
 };
 
+// Set Product id
+Buscape.prototype.productId = function(productId) {
+  return this._productId = productId, this;
+}
+
 // Set category
 Buscape.prototype.categoryId = function(categoryId) {
   return this._categoryId = categoryId, this;
@@ -156,6 +161,7 @@ Buscape.prototype.done = function (cb) {
         id: this._id,
         country: this._country || 'BR'
       }))
+      .query({productId: this._productId})
       .query({categoryId: this._categoryId})
       .query(_.isArray(this._keywords) ? helpers.searchParams(this._keywords) : {keyword: this._keywords})
       .query({priceMin: this._minPrice})
