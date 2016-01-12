@@ -7,9 +7,9 @@ var format = require('./lib/formatter')
   , _ = require('underscore');
 
 // Endpoint template
-var endpoint = _.template('http://<%=service%>/service/<%=method%>/<%=id%>/<%=country%>/');
+var endpoint = _.template('http://<%=service%>/service/<%=method%>/lomadee/<%=id%>/<%=country%>/');
 
-var topProductsEndpoint = _.template('http://<%=service%>/service/v2/topProducts/<%=id%>/<%=country%>/');
+var topProductsEndpoint = _.template('http://<%=service%>/service/v2/topProducts/lomadee/<%=id%>/<%=country%>/');
 
 module.exports = function (opts) {
   return new Buscape(opts);
